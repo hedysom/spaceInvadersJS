@@ -22,6 +22,7 @@ class Player {
             }
         }
 
+        this.rotation = 0
 
         this.velocity = {
             x: 0,
@@ -34,10 +35,20 @@ class Player {
     draw() {
         //c.fillStyle = "red"
         //c.fillRect(this.position.x, this.position.y, this.width, this.height)
-        // call draw only if image finished loading
-        if(this.image)
+        
+        //rotation of the image in a very unintuitive way
+        //the canvas is translated to the position of the player and then rotated on press
+        c.save()
+        c.translate(player.position.x + player.width/2, player.position.y + player.height/2)
+        c.rotate(player.rotation)
+
+        //postion the canvas to back to it's original state
+        c.translate(- player.position.x - player.width/2, -player.position.y - player.height/2)
+
         c.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
         
+        //restore the previously saved state
+        c.restore()
     }
 
     update() {
@@ -50,6 +61,8 @@ class Player {
 }
 
 const player = new Player()
+
+//currect status on keys
 const keys = {
     a : {
         pressed : "false"
@@ -77,10 +90,20 @@ function animate() {
     //draw the player
     player.update()
 
-    if(keys.a.pressed == true)
-        player.velocity.x -= 5
-    else
-        player.velocity.x = 0
+    //check for a and d to be pressed, other conditions are for the player to not go
+    //outside the screen
+    if(keys.a.pressed == true && player.position.x >= 0){
+        player.velocity.x = -7
+        player.rotation = -0.15
+    }
+        else if(keys.d.pressed == true && player.position.x + player.width <= canvas.width){
+                player.velocity.x = 5
+                player.rotation = 0.15
+            }
+                else{
+                    player.velocity.x = 0
+                    player.rotation = 0
+                }
 }
 
 animate()
@@ -89,7 +112,6 @@ animate()
 addEventListener("keydown", ({key}) => {
     switch(key){
         case "a":
-            console.log("a pressed down")
             keys.a.pressed = true
             break
         case "s":
@@ -99,6 +121,9 @@ addEventListener("keydown", ({key}) => {
             keys.d.pressed = true
             break
         case "w":
+            keys.w.pressed = true
+            break
+        case "space":
             keys.w.pressed = true
             break
     }
