@@ -31,9 +31,6 @@ class Player {
   }
 
   draw() {
-    //c.fillStyle = "red"
-    //c.fillRect(this.position.x, this.position.y, this.width, this.height)
-
     //rotation of the image in a very unintuitive way
     //the canvas is translated to the position of the player and then rotated on press
     c.save();
@@ -92,8 +89,84 @@ class Projectile {
   }
 }
 
+class Invader {
+  constructor({ position }) {
+    const image = new Image();
+    image.src = "img/invader.png";
+
+    image.onload = () => {
+      const scale = 1;
+      this.image = image;
+      this.width = image.width * scale;
+      this.height = image.height * scale;
+
+      //position the player at the bottom at half screen
+      this.position = {
+        x: position.x,
+        y: position.y,
+      };
+    };
+
+    this.velocity = {
+      x: 0,
+      y: 0,
+    };
+  }
+
+  draw() {
+    c.drawImage(
+      this.image,
+      this.position.x,
+      this.position.y,
+      this.width,
+      this.height
+    );
+  }
+
+  update() {
+    if (this.image) {
+      this.draw();
+      this.position.x += this.velocity.x;
+      this.position.x += this.velocity.y;
+    }
+  }
+}
+
+class Grid {
+  constructor() {
+    this.position = {
+      x: 0,
+      y: 0,
+    };
+
+    this.velocity = {
+      x: 0,
+      y: 0,
+    };
+
+    this.invaders = [];
+    const columns = Math.floor(canvas.width / 30) //columns to feel the canvas
+    const rows = Math.floor(Math.random() * 5 + 2) //pick a random number of rows from 2 to 7
+    for (let i = 0; i < columns; i++) {
+      for (let j = 0; j < rows; j++) {
+        this.invaders.push(
+          new Invader({
+            position: {
+              x: i * 30,
+              y: j * 30,
+            },
+          })
+        );
+      }
+    }
+  }
+
+  update() {}
+}
+
 const player = new Player();
 const projectiles = [];
+const grids = [new Grid()];
 
 //currect status on keys
 const keys = {
@@ -126,10 +199,8 @@ function animate() {
   //draw the player
   player.update();
 
-
   //array with projectiles
   projectiles.forEach((projectile, index) => {
-
     //remove projectiles if they go out of the screen
     if (projectile.position.y <= 0) {
       projectiles.splice(index, 1);
@@ -137,6 +208,13 @@ function animate() {
     } else {
       projectile.update();
     }
+  });
+
+  grids.forEach((grid) => {
+    grid.update();
+    grid.invaders.forEach(invader => {
+        invader.update()
+    })
   });
 
   //check for a and d to be pressed, other conditions are for the player to not go
@@ -207,7 +285,6 @@ addEventListener("keyup", ({ key }) => {
       keys.w.pressed = false;
       break;
     case " ":
-      console.log(projectiles);
       keys.w.pressed = false;
       break;
   }
