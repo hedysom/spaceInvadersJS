@@ -71,7 +71,7 @@ class Projectile {
     this.position = position;
     this.velocity = velocity;
 
-    this.radius = 3;
+    this.radius = 4;
   }
 
   draw() {
@@ -100,7 +100,6 @@ class Invader {
       this.width = image.width * scale;
       this.height = image.height * scale;
 
-      //position the player at the bottom at half screen
       this.position = {
         x: position.x,
         y: position.y,
@@ -123,11 +122,11 @@ class Invader {
     );
   }
 
-  update() {
+  update({velocity}) {
     if (this.image) {
       this.draw();
-      this.position.x += this.velocity.x;
-      this.position.x += this.velocity.y;
+      this.position.x += velocity.x;
+      this.position.y += velocity.y;
     }
   }
 }
@@ -140,13 +139,17 @@ class Grid {
     };
 
     this.velocity = {
-      x: 0,
+      x: 3,
       y: 0,
     };
 
     this.invaders = [];
-    const columns = Math.floor(canvas.width / 30) //columns to feel the canvas
-    const rows = Math.floor(Math.random() * 5 + 2) //pick a random number of rows from 2 to 7
+
+    const columns = Math.floor(Math.random() * 10) + 5; 
+    const rows = Math.floor(Math.random() * 5 + 2); //pick a random number of rows from 2 to 7
+
+    this.width = columns * 30
+
     for (let i = 0; i < columns; i++) {
       for (let j = 0; j < rows; j++) {
         this.invaders.push(
@@ -161,7 +164,13 @@ class Grid {
     }
   }
 
-  update() {}
+  update() {
+    this.position.x += this.velocity.x
+    this.position.y += this.velocity.y
+
+    if(this.position.x + this.width >= canvas.width || this.position.x <= 0 )
+        this.velocity.x = -this.velocity.x
+  }
 }
 
 const player = new Player();
@@ -212,9 +221,9 @@ function animate() {
 
   grids.forEach((grid) => {
     grid.update();
-    grid.invaders.forEach(invader => {
-        invader.update()
-    })
+    grid.invaders.forEach((invader) => {
+      invader.update({velocity: grid.velocity});
+    });
   });
 
   //check for a and d to be pressed, other conditions are for the player to not go
