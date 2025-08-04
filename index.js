@@ -165,11 +165,20 @@ class Grid {
   }
 
   update() {
+    
     this.position.x += this.velocity.x
     this.position.y += this.velocity.y
 
-    if(this.position.x + this.width >= canvas.width || this.position.x <= 0 )
+    //set vertical velocity to 0 so that the grid doesn't go indefinitely down
+    this.velocity.y = 0
+
+    // side to side and down movement on every bounce
+    if(this.position.x + this.width >= canvas.width || this.position.x <= 0 ){
+        //invert direction of movement
         this.velocity.x = -this.velocity.x
+        //go down
+        this.velocity.y = 30
+    }
   }
 }
 
@@ -195,6 +204,10 @@ const keys = {
     pressed: "false",
   },
 };
+
+let frames = 1
+//for spwaning enemies
+let randomInterval = Math.floor(Math.random() * 500 + 500)
 
 //animate in loop (otherwise the image is not drawn at all, draw function is called
 // before the immage loads)
@@ -241,6 +254,15 @@ function animate() {
     player.velocity.x = 0;
     player.rotation = 0;
   }
+ console.log(frames)
+  //generate a new grid after a certain ammount of frames
+  if( frames % randomInterval === 0){
+    grids.push(new Grid())
+    frames = 1
+    randomInterval = Math.floor(Math.random() * 500 + 500)
+  }
+
+  frames++
 }
 
 animate();
