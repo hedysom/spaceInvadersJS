@@ -122,7 +122,7 @@ class Invader {
     );
   }
 
-  update({velocity}) {
+  update({ velocity }) {
     if (this.image) {
       this.draw();
       this.position.x += velocity.x;
@@ -145,10 +145,10 @@ class Grid {
 
     this.invaders = [];
 
-    const columns = Math.floor(Math.random() * 10) + 5; 
+    const columns = Math.floor(Math.random() * 10) + 5;
     const rows = Math.floor(Math.random() * 5 + 2); //pick a random number of rows from 2 to 7
 
-    this.width = columns * 30
+    this.width = columns * 30;
 
     for (let i = 0; i < columns; i++) {
       for (let j = 0; j < rows; j++) {
@@ -165,19 +165,18 @@ class Grid {
   }
 
   update() {
-    
-    this.position.x += this.velocity.x
-    this.position.y += this.velocity.y
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
 
     //set vertical velocity to 0 so that the grid doesn't go indefinitely down
-    this.velocity.y = 0
+    this.velocity.y = 0;
 
     // side to side and down movement on every bounce
-    if(this.position.x + this.width >= canvas.width || this.position.x <= 0 ){
-        //invert direction of movement
-        this.velocity.x = -this.velocity.x
-        //go down
-        this.velocity.y = 30
+    if (this.position.x + this.width >= canvas.width || this.position.x <= 0) {
+      //invert direction of movement
+      this.velocity.x = -this.velocity.x;
+      //go down
+      this.velocity.y = 30;
     }
   }
 }
@@ -205,9 +204,9 @@ const keys = {
   },
 };
 
-let frames = 1
+let frames = 1;
 //for spwaning enemies
-let randomInterval = Math.floor(Math.random() * 500 + 500)
+let randomInterval = Math.floor(Math.random() * 500 + 500);
 
 //animate in loop (otherwise the image is not drawn at all, draw function is called
 // before the immage loads)
@@ -232,10 +231,34 @@ function animate() {
     }
   });
 
+  //invaders movement and colision detection
   grids.forEach((grid) => {
     grid.update();
-    grid.invaders.forEach((invader) => {
-      invader.update({velocity: grid.velocity});
+    //change of vertical and horizontal directions for invaders
+    //index i is for colision only
+    grid.invaders.forEach((invader, i) => {
+      invader.update({ velocity: grid.velocity });
+
+      //colision detection for projectiles 
+      projectiles.forEach((projectile, j) => {
+        //vertical check top
+        if (
+          projectile.position.y - projectile.radius <=
+            invader.position.y + invader.height &&
+          //vertica check bottom
+          projectile.position.y + projectile.radius >= invader.position.y &&
+          //left side
+          projectile.position.x + projectile.radius >= invader.position.x &&
+          //right side
+          projectile.position.x - projectile.radius <= invader.position.x
+        ) {
+        
+          setTimeout(() => {
+            grid.invaders.splice(i, 1);
+            projectiles.splice(j, 1);
+          }, 0);
+        }
+      });
     });
   });
 
@@ -254,15 +277,15 @@ function animate() {
     player.velocity.x = 0;
     player.rotation = 0;
   }
- console.log(frames)
+  console.log(frames);
   //generate a new grid after a certain ammount of frames
-  if( frames % randomInterval === 0){
-    grids.push(new Grid())
-    frames = 1
-    randomInterval = Math.floor(Math.random() * 500 + 500)
+  if (frames % randomInterval === 0) {
+    grids.push(new Grid());
+    frames = 1;
+    randomInterval = Math.floor(Math.random() * 500 + 500);
   }
 
-  frames++
+  frames++;
 }
 
 animate();
