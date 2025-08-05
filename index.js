@@ -253,9 +253,23 @@ function animate() {
           projectile.position.x - projectile.radius <= invader.position.x
         ) {
         
+        //remove an invader and the projectile
           setTimeout(() => {
-            grid.invaders.splice(i, 1);
-            projectiles.splice(j, 1);
+
+            //check if the invader exists before slicing
+            const invaderFound = grid.invaders.find( invader2 => 
+                invader === invader2
+            )
+            //check if the projectile exists before slicing
+            const projectileFound = projectiles.find( projectile2 => 
+                projectile === projectile2
+            )
+
+            //call splice if both were found
+            if(invaderFound && projectileFound){
+                grid.invaders.splice(i, 1);
+                projectiles.splice(j, 1);
+            }
           }, 0);
         }
       });
