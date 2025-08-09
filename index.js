@@ -77,9 +77,30 @@ class Projectile {
   draw() {
     c.beginPath();
     c.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-    c.strokeStyle = "red";
-    c.stroke();
+    c.fillStyle= "red";
+    c.fill();
     c.closePath();
+  }
+
+  update() {
+    this.draw();
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+  }
+}
+
+class InvaderProjectile {
+  constructor({ position, velocity }) {
+    this.position = position;
+    this.velocity = velocity;
+
+    this.width = 3;
+    this.height = 10;
+  }
+
+  draw() {
+    c.fillStyle = "white";
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 
   update() {
@@ -129,7 +150,23 @@ class Invader {
       this.position.y += velocity.y;
     }
   }
+
+  shoot(invaderProjectiles) {
+    invaderProjectiles.push(
+      new InvaderProjectile({
+        position: {
+          x: this.position.x + this.width / 2,
+          y: this.position.y + this.height,
+        },
+        velocity: {
+          x: 0,
+          y: 5,
+        },
+      })
+    );
+  }
 }
+
 
 class Grid {
   constructor() {
@@ -184,6 +221,7 @@ class Grid {
 const player = new Player();
 const projectiles = [];
 const grids = [new Grid()];
+const invaderProjectiles = [];
 
 //currect status on keys
 const keys = {
@@ -214,11 +252,15 @@ function animate() {
   requestAnimationFrame(animate);
 
   //background
-  c.fillRect(0, 0, canvas.width, canvas.height);
   c.fillStyle = "black";
+  c.fillRect(0, 0, canvas.width, canvas.height);
 
   //draw the player
   player.update();
+
+  invaderProjectiles.forEach((invaderProjectile) => {
+    invaderProjectile.update();
+  });
 
   //array with projectiles
   projectiles.forEach((projectile, index) => {
@@ -234,6 +276,14 @@ function animate() {
   //invaders movement and colision detection
   grids.forEach((grid, k) => {
     grid.update();
+
+    //spawn invader projectiles
+    // check if there are invaders
+    if (frames % 100 === 0 && grid.invaders.length > 0) {
+      //select a random invader
+      grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(invaderProjectiles);
+    }
+
     //change of vertical and horizontal directions for invaders
     //index i is for colision only
     grid.invaders.forEach((invader, i) => {
@@ -305,7 +355,8 @@ function animate() {
     player.velocity.x = 0;
     player.rotation = 0;
   }
-  console.log(frames);
+
+  //spawn enemies
   //generate a new grid after a certain ammount of frames
   if (frames % randomInterval === 0) {
     grids.push(new Grid());
