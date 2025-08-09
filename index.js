@@ -205,7 +205,7 @@ const keys = {
 };
 
 let frames = 1;
-//for spwaning enemies
+//for spwaning enemiest random invervals of frame from 500 to 1000
 let randomInterval = Math.floor(Math.random() * 500 + 500);
 
 //animate in loop (otherwise the image is not drawn at all, draw function is called
@@ -232,14 +232,14 @@ function animate() {
   });
 
   //invaders movement and colision detection
-  grids.forEach((grid) => {
+  grids.forEach((grid, k) => {
     grid.update();
     //change of vertical and horizontal directions for invaders
     //index i is for colision only
     grid.invaders.forEach((invader, i) => {
       invader.update({ velocity: grid.velocity });
 
-      //colision detection for projectiles 
+      //colision detection for projectiles
       projectiles.forEach((projectile, j) => {
         //vertical check top
         if (
@@ -250,25 +250,39 @@ function animate() {
           //left side
           projectile.position.x + projectile.radius >= invader.position.x &&
           //right side
-          projectile.position.x - projectile.radius <= invader.position.x
+          projectile.position.x - projectile.radius <=
+            invader.position.x + invader.width
         ) {
-        
-        //remove an invader and the projectile
+          //remove invader and the projectile
           setTimeout(() => {
-
             //check if the invader exists before slicing
-            const invaderFound = grid.invaders.find( invader2 => 
-                invader === invader2
-            )
+            const invaderFound = grid.invaders.find(
+              (invader2) => invader === invader2
+            );
             //check if the projectile exists before slicing
-            const projectileFound = projectiles.find( projectile2 => 
-                projectile === projectile2
-            )
+            const projectileFound = projectiles.find(
+              (projectile2) => projectile === projectile2
+            );
 
             //call splice if both were found
-            if(invaderFound && projectileFound){
-                grid.invaders.splice(i, 1);
-                projectiles.splice(j, 1);
+            if (invaderFound && projectileFound) {
+              grid.invaders.splice(i, 1);
+              projectiles.splice(j, 1);
+              if (grid.invaders.length > 0) {
+                const firstIvader = grid.invaders[0];
+                const lastIvader = grid.invaders[grid.invaders.length - 1];
+                //update right side of the grid after removing a full column
+                grid.width =
+                  lastIvader.position.x -
+                  firstIvader.position.x +
+                  lastIvader.width;
+                //update right side
+                grid.position.x = firstIvader.position.x;
+              } else {
+                // if lenght is 0 (all invaders has been removed)
+                //remove the grid that has been eliminated
+                grids.splice(k, 1);
+              }
             }
           }, 0);
         }
