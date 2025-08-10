@@ -77,7 +77,7 @@ class Projectile {
   draw() {
     c.beginPath();
     c.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
-    c.fillStyle= "red";
+    c.fillStyle = "red";
     c.fill();
     c.closePath();
   }
@@ -166,7 +166,6 @@ class Invader {
     );
   }
 }
-
 
 class Grid {
   constructor() {
@@ -258,8 +257,18 @@ function animate() {
   //draw the player
   player.update();
 
-  invaderProjectiles.forEach((invaderProjectile) => {
-    invaderProjectile.update();
+  //invaders shooting
+  invaderProjectiles.forEach((invaderProjectile, index) => {
+    //remove projectile out of screen
+    if (
+      invaderProjectile.position.y + invaderProjectile.height >=
+      canvas.height
+    ) {
+      invaderProjectiles.splice(index, 1);
+    //continue animating otherwise
+    } else {
+      invaderProjectile.update();
+    }
   });
 
   //array with projectiles
@@ -273,7 +282,7 @@ function animate() {
     }
   });
 
-  //invaders movement and colision detection
+  //invaders movement, shooting and colision detection
   grids.forEach((grid, k) => {
     grid.update();
 
@@ -281,15 +290,17 @@ function animate() {
     // check if there are invaders
     if (frames % 100 === 0 && grid.invaders.length > 0) {
       //select a random invader
-      grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(invaderProjectiles);
+      grid.invaders[Math.floor(Math.random() * grid.invaders.length)].shoot(
+        invaderProjectiles
+      );
     }
 
     //change of vertical and horizontal directions for invaders
-    //index i is for colision only
+    //index i is for collision only
     grid.invaders.forEach((invader, i) => {
       invader.update({ velocity: grid.velocity });
 
-      //colision detection for projectiles
+      //collision detection for projectiles
       projectiles.forEach((projectile, j) => {
         //vertical check top
         if (
