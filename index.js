@@ -264,14 +264,24 @@ function animate() {
       invaderProjectile.position.y + invaderProjectile.height >=
       canvas.height
     ) {
-      invaderProjectiles.splice(index, 1);
-    //continue animating otherwise
+      setTimeout(() => {
+        invaderProjectiles.splice(index, 1);
+      }, 0);
+      //continue animating otherwise
     } else {
       invaderProjectile.update();
     }
+
+    //end game if projectile hits the player
+    if(rectangularCollision({rectangle1: invaderProjectile,
+      rectangle2: player
+    })){
+      invaderProjectiles.splice(index, 1)
+      endGame()
+    }
   });
 
-  //array with projectiles
+  //player shooting projectiles
   projectiles.forEach((projectile, index) => {
     //remove projectiles if they go out of the screen
     if (projectile.position.y <= 0) {
@@ -302,17 +312,14 @@ function animate() {
 
       //collision detection for projectiles
       projectiles.forEach((projectile, j) => {
-        //vertical check top
         if (
           projectile.position.y - projectile.radius <=
             invader.position.y + invader.height &&
-          //vertica check bottom
           projectile.position.y + projectile.radius >= invader.position.y &&
-          //left side
           projectile.position.x + projectile.radius >= invader.position.x &&
-          //right side
           projectile.position.x - projectile.radius <=
             invader.position.x + invader.width
+            //circleRectCollision(projectile, invader)
         ) {
           //remove invader and the projectile
           setTimeout(() => {
@@ -433,3 +440,26 @@ addEventListener("keyup", ({ key }) => {
       break;
   }
 });
+
+
+function rectangularCollision({ rectangle1, rectangle2 }) {
+  return (
+    rectangle1.position.y + rectangle1.height >= rectangle2.position.y &&
+    rectangle1.position.x + rectangle1.width >= rectangle2.position.x &&
+    rectangle1.position.x <= rectangle2.position.x + rectangle2.width
+  )
+}
+
+/*
+function circleRectCollision({circle, rectangle}) {
+  const closestX = Math.max(rectangle.position.x, Math.min(circle.position.x, rectangle.position.x + rectangle.width));
+  const closestY = Math.max(rectangle.position.y, Math.min(circle.position.y, rectangle.position.y + rectangle.height));
+  const dx = circle.position.x - closestX;
+  const dy = circle.position.y - closestY;
+  return dx * dx + dy * dy <= circle.radius * circle.radius;
+}*/ //chatgpt vomit
+
+
+function endGame(){
+  console.log("you've lost")
+}
